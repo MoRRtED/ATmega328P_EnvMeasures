@@ -72,25 +72,23 @@ ISR (PCINT0_vect) // for D8
         }*/
       Serial.println("LED ON");
       byte bitsToSend = 0;
-      // СѓСЃС‚Р°РЅР°РІР»РёРІР°РµРј HIGH РІ СЃРѕРѕС‚РІРµС‚СЃС‚РІСѓСЋС‰РµРј Р±РёС‚Рµ
+      int numberToDisplay = 0;
+      // set HIGH РІ to the necessary level
       if (LEDStatus)
       {
-        bitWrite(bitsToSend, 7, HIGH);
+        bitWrite(bitsToSend, numberToDisplay, HIGH);
       }
       else
       {
-        bitWrite(bitsToSend, 7, LOW);
+        bitWrite(bitsToSend, numberToDisplay, LOW);        
       }
-
-
-      int numberToDisplay = 7;
-      // СѓСЃС‚Р°РЅР°РІР»РёРІР°РµРј СЃРёРЅС…СЂРѕРЅРёР·Р°С†РёСЋ "Р·Р°С‰РµР»РєРё" РЅР° LOW
+      // set trigger to LOW
       digitalWrite(ST_CP, LOW);
       // РїРµСЂРµРґР°РµРј РїРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅРѕ РЅР° dataPin
-      shiftOut(DS, SH_CP, MSBFIRST, numberToDisplay);
+      shiftOut(DS, SH_CP, MSBFIRST, bitsToSend);
       //"Р·Р°С‰РµР»РєРёРІР°РµРј" СЂРµРіРёСЃС‚СЂ, С‚РµРј СЃР°РјС‹Рј СѓСЃС‚Р°РЅР°РІР»РёРІР°СЏ Р·РЅР°С‡РµРЅРёСЏ РЅР° РІС‹С…РѕРґР°С…
       digitalWrite(ST_CP, HIGH);
-      LEDStatus = !LEDStatus;
+      LEDStatus = !LEDStatus;     
     }
   }
 }
@@ -153,6 +151,35 @@ void loop()
     getDataDHT11();
     isInterrupt_T1 = false;
   }
+  //for test purpouse
+      byte bitsToSend = 0;
+      int numberToDisplay = 0;
+      // set HIGH РІ to the necessary level
+      if (LEDStatus)
+      {
+        bitWrite(bitsToSend, numberToDisplay, HIGH);
+        lcd.setCursor(0, 0);
+        lcd.print("turned on ");
+         
+      }
+      else
+      {
+        bitWrite(bitsToSend, numberToDisplay, LOW);
+        lcd.setCursor(0, 0);
+        lcd.print("turned off ");
+        
+      }
+
+
+   
+      // set trigger to LOW
+      digitalWrite(ST_CP, LOW);
+      // РїРµСЂРµРґР°РµРј РїРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅРѕ РЅР° dataPin
+      shiftOut(DS, SH_CP, MSBFIRST, bitsToSend);
+      //"Р·Р°С‰РµР»РєРёРІР°РµРј" СЂРµРіРёСЃС‚СЂ, С‚РµРј СЃР°РјС‹Рј СѓСЃС‚Р°РЅР°РІР»РёРІР°СЏ Р·РЅР°С‡РµРЅРёСЏ РЅР° РІС‹С…РѕРґР°С…
+      digitalWrite(ST_CP, HIGH);
+      LEDStatus = !LEDStatus;     
+      delay(100);
 }
 
 void getDataDHT11()
