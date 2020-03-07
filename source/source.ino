@@ -80,7 +80,7 @@ ISR (PCINT0_vect) // for D8
       }
       else
       {
-        bitWrite(bitsToSend, numberToDisplay, LOW);        
+        bitWrite(bitsToSend, numberToDisplay, LOW);
       }
       // set trigger to LOW
       digitalWrite(ST_CP, LOW);
@@ -88,7 +88,7 @@ ISR (PCINT0_vect) // for D8
       shiftOut(DS, SH_CP, MSBFIRST, bitsToSend);
       //"Р·Р°С‰РµР»РєРёРІР°РµРј" СЂРµРіРёСЃС‚СЂ, С‚РµРј СЃР°РјС‹Рј СѓСЃС‚Р°РЅР°РІР»РёРІР°СЏ Р·РЅР°С‡РµРЅРёСЏ РЅР° РІС‹С…РѕРґР°С…
       digitalWrite(ST_CP, HIGH);
-      LEDStatus = !LEDStatus;     
+      LEDStatus = !LEDStatus;
     }
   }
 }
@@ -98,6 +98,8 @@ bool isInterrupt_T1 = false;
 ISR(TIMER1_COMPA_vect)
 {
   isInterrupt_T1 = true;
+  //for test purpouse
+  shiftTesting();
 }
 
 //PC interrupt handler
@@ -151,35 +153,6 @@ void loop()
     getDataDHT11();
     isInterrupt_T1 = false;
   }
-  //for test purpouse
-      byte bitsToSend = 0;
-      int numberToDisplay = 0;
-      // set HIGH РІ to the necessary level
-      if (LEDStatus)
-      {
-        bitWrite(bitsToSend, numberToDisplay, HIGH);
-        lcd.setCursor(0, 0);
-        lcd.print("turned on ");
-         
-      }
-      else
-      {
-        bitWrite(bitsToSend, numberToDisplay, LOW);
-        lcd.setCursor(0, 0);
-        lcd.print("turned off ");
-        
-      }
-
-
-   
-      // set trigger to LOW
-      digitalWrite(ST_CP, LOW);
-      // РїРµСЂРµРґР°РµРј РїРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅРѕ РЅР° dataPin
-      shiftOut(DS, SH_CP, MSBFIRST, bitsToSend);
-      //"Р·Р°С‰РµР»РєРёРІР°РµРј" СЂРµРіРёСЃС‚СЂ, С‚РµРј СЃР°РјС‹Рј СѓСЃС‚Р°РЅР°РІР»РёРІР°СЏ Р·РЅР°С‡РµРЅРёСЏ РЅР° РІС‹С…РѕРґР°С…
-      digitalWrite(ST_CP, HIGH);
-      LEDStatus = !LEDStatus;     
-      delay(100);
 }
 
 void getDataDHT11()
@@ -211,5 +184,29 @@ void getDataDHT11()
   Serial.print(t);
   Serial.println(" *C ");
 }
-
-
+void shiftTesting()
+{
+  byte bitsToSend = 0;
+  int numberToDisplay = 0;
+  // set HIGH РІ to the necessary level
+  lcd.setCursor(0, 0);
+  lcd.print("Test");
+  lcd.setCursor(0, 1);
+  if (LEDStatus)
+  {
+    bitWrite(bitsToSend, numberToDisplay, HIGH);
+    lcd.print("turned on ");
+  }
+  else
+  {
+    bitWrite(bitsToSend, numberToDisplay, LOW);
+    lcd.print("turned off");
+  }
+  // set trigger to LOW
+  digitalWrite(ST_CP, LOW);
+  // РїРµСЂРµРґР°РµРј РїРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅРѕ РЅР° dataPin
+  shiftOut(DS, SH_CP, MSBFIRST, bitsToSend);
+  //"Р·Р°С‰РµР»РєРёРІР°РµРј" СЂРµРіРёСЃС‚СЂ, С‚РµРј СЃР°РјС‹Рј СѓСЃС‚Р°РЅР°РІР»РёРІР°СЏ Р·РЅР°С‡РµРЅРёСЏ РЅР° РІС‹С…РѕРґР°С…
+  digitalWrite(ST_CP, HIGH);
+  LEDStatus = !LEDStatus;
+}
