@@ -28,6 +28,12 @@ DHT dht(DHTPIN, DHTTYPE);
 
 int speakerPin_Term = 8;
 int length = 1;
+bool LEDStatus = false;
+bool isInterrupt_T1 = false;
+//necessary color with 440 nm is #6030b1
+int RED = 96;
+int GREEN = 48;
+int BLUE = 177;
 
 #define LED_TOO_COLD A0
 #define LED_PERFECT 07
@@ -39,9 +45,6 @@ void pciSetup(byte pin)
   PCIFR  |= bit (digitalPinToPCICRbit(pin)); // clear any outstanding interrupt
   PCICR  |= bit (digitalPinToPCICRbit(pin)); // enable interrupt for the group
 }
-
-int interrupt_count = 0;
-boolean LEDStatus = false;
 
 //PC interrupt handler
 ISR (PCINT0_vect) // for D8
@@ -70,36 +73,18 @@ ISR (PCINT0_vect) // for D8
         LEDStatus = true;
         PORTB |= bit (2);  // turn on D10
         }*/
-      Serial.println("LED ON");
-      byte bitsToSend = 0;
-      int numberToDisplay = 0;
-      // set HIGH РІ to the necessary level
-      if (LEDStatus)
-      {
-        bitWrite(bitsToSend, numberToDisplay, HIGH);
-      }
-      else
-      {
-        bitWrite(bitsToSend, numberToDisplay, LOW);
-      }
-      // set trigger to LOW
-      digitalWrite(ST_CP, LOW);
-      // РїРµСЂРµРґР°РµРј РїРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅРѕ РЅР° dataPin
-      shiftOut(DS, SH_CP, MSBFIRST, bitsToSend);
-      //"Р·Р°С‰РµР»РєРёРІР°РµРј" СЂРµРіРёСЃС‚СЂ, С‚РµРј СЃР°РјС‹Рј СѓСЃС‚Р°РЅР°РІР»РёРІР°СЏ Р·РЅР°С‡РµРЅРёСЏ РЅР° РІС‹С…РѕРґР°С…
-      digitalWrite(ST_CP, HIGH);
-      LEDStatus = !LEDStatus;
+      shiftData(0, false);
     }
   }
+  
 }
 
-bool isInterrupt_T1 = false;
 //interrupt T1 handler
 ISR(TIMER1_COMPA_vect)
 {
-  isInterrupt_T1 = true;
+  isInterrupt_T1 = !isInterrupt_T1;
   //for test purpouse
-  shiftTesting();
+  //shiftData(0, false);
 }
 
 //PC interrupt handler
@@ -151,7 +136,7 @@ void loop()
   if (isInterrupt_T1)
   {
     getDataDHT11();
-    isInterrupt_T1 = false;
+    isInterrupt_T1 = !isInterrupt_T1; //set false
   }
 }
 
@@ -184,29 +169,44 @@ void getDataDHT11()
   Serial.print(t);
   Serial.println(" *C ");
 }
-void shiftTesting()
+
+void shiftData(int numberToDisplay, boolean isLCD)
 {
   byte bitsToSend = 0;
-  int numberToDisplay = 0;
-  // set HIGH РІ to the necessary level
-  lcd.setCursor(0, 0);
-  lcd.print("Test");
-  lcd.setCursor(0, 1);
+  
+  // set HIGH РІ to the necessary level 
   if (LEDStatus)
   {
     bitWrite(bitsToSend, numberToDisplay, HIGH);
-    lcd.print("turned on ");
+    Serial.println("LED ON");
+
+    if(isLCD)
+    {
+      lcd.setCursor(0, 0);
+      lcd.setCursor(0, 1);
+      lcd.print("turned on ");
+    }
   }
   else
   {
     bitWrite(bitsToSend, numberToDisplay, LOW);
-    lcd.print("turned off");
+    Serial.println("LED OFF");
+    
+    if(isLCD)
+    {
+      lcd.setCursor(0, 0);
+      lcd.setCursor(0, 1);
+      lcd.print("turned off ");
+    }
   }
+  Serial.print("Shift result: ");
+  Serial.println(bitsToSend, BIN);
+  
   // set trigger to LOW
   digitalWrite(ST_CP, LOW);
-  // РїРµСЂРµРґР°РµРј РїРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅРѕ РЅР° dataPin
+  //transfer the sequence to dataPin
   shiftOut(DS, SH_CP, MSBFIRST, bitsToSend);
-  //"Р·Р°С‰РµР»РєРёРІР°РµРј" СЂРµРіРёСЃС‚СЂ, С‚РµРј СЃР°РјС‹Рј СѓСЃС‚Р°РЅР°РІР»РёРІР°СЏ Р·РЅР°С‡РµРЅРёСЏ РЅР° РІС‹С…РѕРґР°С…
+  //"latch" the register, thereby setting the values ​​at the outputs
   digitalWrite(ST_CP, HIGH);
   LEDStatus = !LEDStatus;
 }
