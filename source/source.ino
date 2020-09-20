@@ -51,30 +51,35 @@ ISR (PCINT0_vect) // for D8
 {
   if (PINB & _BV(PB0))
   {
-    float sound_analog = analogRead (KVPIN) * (5.0 / 1023.0);
-    float sound_level = abs(20 * log10(sound_analog / 5.0));
-    float resist = sound_analog / 118;
-    Serial.print ("Analog voltage :");
-    Serial.print (sound_analog, 4);
-    Serial.print ("V ,");
-    Serial.print (sound_level, 2);
-    Serial.println ("dB");
-    if (sound_level >= 6.1 && sound_level <= 6.3)
-    {
-      /*if (LEDStatus)
-        {
-        Serial.println("LED OFF");
-        LEDStatus = false;
-        PORTB &= ~bit (2); // turn off D10
-        }
-        else
-        {
-        Serial.println("LED ON");
-        LEDStatus = true;
-        PORTB |= bit (2);  // turn on D10
-        }*/
-      shiftData(0, false);
-    }
+    //temporary button 
+    shiftData(1, false);
+    
+//    float sound_analog = analogRead (KVPIN) * (5.0 / 1023.0);
+//    float sound_level = abs(20 * log10(sound_analog / 5.0));
+//    float resist = sound_analog / 118;
+//    Serial.print ("Analog voltage :");
+//    Serial.print (sound_analog, 4);
+//    Serial.print ("V ,");
+//    Serial.print (sound_level, 2);
+//    Serial.println ("dB");
+//    if (sound_level >= 6.1 && sound_level <= 6.3)
+//    {
+//      /*if (LEDStatus)
+//        {
+//        Serial.println("LED OFF");
+//        LEDStatus = false;
+//        PORTB &= ~bit (2); // turn off D10
+//        }
+//        else
+//        {
+//        Serial.println("LED ON");
+//        LEDStatus = true;
+//        PORTB |= bit (2);  // turn on D10
+//        }*/
+//      
+//      shiftData(0, false);
+//    }
+    
   }
   
 }
@@ -201,7 +206,7 @@ void shiftData(int numberToDisplay, boolean isLCD)
   }
   Serial.print("Shift result: ");
   Serial.println(bitsToSend, BIN);
-  
+
   // set trigger to LOW
   digitalWrite(ST_CP, LOW);
   //transfer the sequence to dataPin
