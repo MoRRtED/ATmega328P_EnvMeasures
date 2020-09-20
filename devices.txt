@@ -5,3 +5,4 @@ LCD 16x2 - 1602A
 220 Om resistors
 AL307 - 4 LEDs 
 74HC595 - shift register
+KY-016 - LED RGB
